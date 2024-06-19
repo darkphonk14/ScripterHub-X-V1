@@ -1,0 +1,828 @@
+-- Load OrionLib and initialize notifications
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+OrionLib:MakeNotification({
+Name = "ScriptHub X V1 DEV",
+Content = "Scripter Hub X Scripts",
+Image = "rbxasset://6770193299",
+Time = 5
+})
+
+-- Set the value for HidePremium (true or false)
+local hidePremiumStatus = false -- Set to true if you want to hide the premium status by default
+
+-- Variable to store the toggle state
+local notificationsEnabled = true
+
+-- Variable to store the toggle state for infinite jump
+local infiniteJumpEnabled = false
+
+-- Function to handle infinite jump
+local function onJumpRequest()
+    if infiniteJumpEnabled then
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        if character and character:FindFirstChildOfClass("Humanoid") then
+            character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
+end
+
+-- Function to create and display notifications
+local function createNotification(name, content, image, time)
+    if notificationsEnabled then
+        OrionLib:MakeNotification({
+            Name = name,
+            Content = content,
+            Image = image,
+            Time = time
+        })
+    end
+end
+
+-- Connect the jump request event to the function
+local UserInputService = game:GetService("UserInputService")
+UserInputService.JumpRequest:Connect(onJumpRequest)
+
+-- Set Intro Text and Icon
+local introText = "Welcome to ScriptHub X V1 DEV"
+local introIcon = "rbxassetid://6770193299"
+
+-- Create main window
+local Window = OrionLib:MakeWindow({
+Name = "ScriptHub X V1 DEV",
+HidePremium = false,
+SaveConfig = false,
+ConfigFolder = "Orion",
+IntroText = introText,
+IntroIcon = introIcon
+})
+
+-- Main Tab
+local MainTab = Window:MakeTab({
+Name = "Main",
+Icon = "rbxassetid://11254763826",
+PremiumOnly = false
+})
+
+local MainSection = MainTab:AddSection({
+Name = "Main - Info"
+})
+
+MainTab:AddLabel("Universal Script By Snipez Him self")
+MainTab:AddLabel("and his little companion nothing_5951")
+MainTab:AddLabel("V1 Dev script for now")
+MainTab:AddLabel("for help ")
+MainTab:AddLabel("Solara Executer doesnt Support every Script")
+
+-- Toggle Button for Notifications
+MainSection:AddToggle({
+    Name = "Toggle Notifications",
+    Default = true,
+    Callback = function(state)
+        notificationsEnabled = state
+        local status = state and "enabled" or "disabled"
+        createNotification("Notification Toggle", "Notifications have been " .. status, "rbxassetid://6770193299", 5)
+        end
+    })
+
+-- Player Tab
+local PlayerTab = Window:MakeTab({
+Name = "Player",
+Icon = "rbxassetid://2706340901",
+PremiumOnly = false
+})
+
+local PlayerSection = PlayerTab:AddSection({
+Name = "Player"
+})
+
+-- Sliders for adjusting WalkSpeed and JumpPower
+PlayerSection:AddSlider({
+Name = "Runspeed",
+Min = 15,
+Max = 510,
+Default = 16,
+Color = Color3.fromRGB(87, 43, 217),
+Increment = 15,
+ValueName = "Runspeed",
+Callback = function(Value)
+game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+end    
+})
+
+PlayerSection:AddSlider({
+Name = "Highjump",
+Min = 50,
+Max = 300,
+Default = 50,
+Color = Color3.fromRGB(87, 43, 217),
+Increment = 15,
+ValueName = "Highjump",
+Callback = function(Value)
+game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+end   
+})
+
+-- Noclip functionality
+local noclip = false
+local player = game.Players.LocalPlayer
+
+local function noclipLoop()
+while noclip do
+for _, v in pairs(player.Character:GetDescendants()) do
+    if v:IsA("BasePart") and v.CanCollide then
+        v.CanCollide = false
+    end
+end
+wait()
+end
+end
+
+PlayerSection:AddToggle({
+Name = "Noclip",
+Default = false,
+Callback = function(state)
+noclip = state
+if noclip then
+    OrionLib:MakeNotification({
+        Name = "Noclip Enabled",
+        Content = "You can now pass through objects",
+        Image = "rbxassetid://2420004216",
+        Time = 5
+    })
+    noclipLoop()
+else
+    OrionLib:MakeNotification({
+        Name = "Noclip Disabled",
+        Content = "Noclip has been turned off",
+        Image = "rbxassetid://2420004216",
+        Time = 5
+    })
+end
+end
+})
+
+-- Godmode function
+local godmode = false
+
+local function toggleGodmode()
+godmode = not godmode
+game.Players.LocalPlayer.Character.Humanoid.MaxHealth = godmode and math.huge or 100
+game.Players.LocalPlayer.Character.Humanoid.Health = godmode and math.huge or 100
+end
+
+PlayerSection:AddToggle({
+Name = "Godmode",
+Default = false,
+Callback = function(state)
+toggleGodmode()
+OrionLib:MakeNotification({
+    Name = "Godmode " .. (state and "Enabled" or "Disabled"),
+    Content = "You are " .. (state and "invulnerable" or "vulnerable"),
+    Image = "rbxassetid://2420004216",
+    Time = 5
+})
+end
+})
+
+-- Infinite Jump Toggle
+PlayerSection:AddToggle({
+    Name = "Enable Infinite Jump",
+    Default = false,
+    Callback = function(state)
+        infiniteJumpEnabled = state
+        local status = state and "enabled" or "disabled"
+        OrionLib:MakeNotification({
+            Name = "Infinite Jump Toggle",
+            Content = "Infinite Jump has been " .. status,
+            Image = "rbxassetid://6770193299",
+            Time = 5
+        })
+    end
+})
+
+-- Add Reset Button
+PlayerSection:AddButton({
+Name = "Reset Character",
+Callback = function()
+game.Players.LocalPlayer.Character:BreakJoints()
+OrionLib:MakeNotification({
+    Name = "Character Reset",
+    Content = "Your character has been reset",
+    Image = "rbxassetid://2420004216",
+    Time = 5
+})
+end    
+})
+
+-- Add Rejoin Button
+PlayerSection:AddButton({
+Name = "Rejoin Game",
+Callback = function()
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
+OrionLib:MakeNotification({
+    Name = "Rejoining Game",
+    Content = "You are rejoining the game",
+    Image = "rbxassetid://2420004216",
+    Time = 5
+})
+end    
+})
+
+local LobbyTab = Window:MakeTab({
+Name = "Lobby",
+Icon = "rbxassetid://2706340901",
+PremiumOnly = false
+}) 
+-- Standard Stuff Tab (Placeholder)
+local StandardStuffTab = Window:MakeTab({
+Name = "Standard Stuff",
+Icon = "rbxassetid://5066964473",
+PremiumOnly = false
+})
+
+-- Button to load external GUI
+StandardStuffTab:AddButton({
+Name = "Open GUI",
+Callback = function()
+loadstring(game:HttpGet("https://pastebin.com/raw/UXmbai5q", true))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Open GUI",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Infinite Yield",
+Callback = function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Infinite Yield",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Shadow Hub Darkmodz",
+Callback = function()
+    loadstring(game:HttpGet("https://gist.githubusercontent.com/dark-modz/a89a5d629d598fc198d1106fe6701685/raw/646a9cefa844cccd3c760715f59d25fe63b4a06b/shadowhub-NekoAndMore"))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Shadow Hub Darkmodz",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Crash / Lagg",
+Callback = function()
+    --// made my reestart
+    --// fixed by daddy ewo
+    while wait(0.6) do --// don't change it's the best
+        game:GetService("NetworkClient"):SetOutgoingKBPSLimit(math.huge)
+        local function getmaxvalue(val)
+           local mainvalueifonetable = 499999
+           if type(val) ~= "number" then
+               return nil
+           end
+           local calculateperfectval = (mainvalueifonetable/(val+2))
+           return calculateperfectval
+        end
+        local function bomb(tableincrease, tries)
+        local maintable = {}
+        local spammedtable = {}
+        table.insert(spammedtable, {})
+        z = spammedtable[1]
+        for i = 1, tableincrease do
+            local tableins = {}
+            table.insert(z, tableins)
+            z = tableins
+        end
+        local calculatemax = getmaxvalue(tableincrease)
+        local maximum
+        if calculatemax then
+             maximum = calculatemax
+             else
+             maximum = 999999
+        end
+        for i = 1, maximum do
+             table.insert(maintable, spammedtable)
+        end
+        for i = 1, tries do
+             game.RobloxReplicatedStorage.SetPlayerBlockList:FireServer(maintable)
+        end
+        end
+        bomb(250, 2) --// change values if client crashes
+        end
+    end
+})
+
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Crash / Lagg",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+
+StandardStuffTab:AddButton({
+    Name = "Open GUI",
+    Callback = function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/UXmbai5q", true))()
+    OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Open GUI",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Player Fling",
+Callback = function()
+    -- Made by ProjectCoxelizo.
+    --Generated with Syntax's Converter, comet hub in the works! pastebin search coming soooon REEEEEEE.
+    --Counted 18 (objects this time!!!)
+    local function CreateInstance(cls,props)
+        local inst = Instance.new(cls)
+        for i,v in pairs(props) do
+            inst[i] = v
+        end
+        return inst
+        end
+
+        local FEkillgui = CreateInstance('ScreenGui',{DisplayOrder=0,Enabled=true,ResetOnSpawn=true,Name='FEkillgui', Parent=game.CoreGui})
+        local Topframe = CreateInstance('Frame',{Style=Enum.FrameStyle.Custom,Active=false,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.152941, 0.152941, 0.152941),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.0366197191, 0, 0.344506502, 0),Rotation=0,Selectable=false,Size=UDim2.new(0, 120, 0, 16),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name = 'Topframe',Parent = FEkillgui})
+        local Mainframe = CreateInstance('Frame',{Style=Enum.FrameStyle.Custom,Active=false,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.219608, 0.219608, 0.219608),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(-7.0028007e-05, 0, 0.965523064, 0),Rotation=0,Selectable=false,Size=UDim2.new(0, 120, 0, 59),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name = 'Mainframe',Parent = Topframe})
+        local Namebox = CreateInstance('TextBox',{ClearTextOnFocus=true,Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,MultiLine=false,Text='Player Name',TextColor3=Color3.new(0, 0, 0), PlaceholderText='', PlaceholderColor3=Color3.new(0.7, 0.7, 0.7),TextScaled=true,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=true,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,Active=true,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.278431, 0.278431, 0.278431),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.0546333343, 0, 0.121705264, 0),Rotation=0,Selectable=true,Size=UDim2.new(0, 105, 0, 15),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='Namebox',Parent = Mainframe})
+        local Kill = CreateInstance('TextButton',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='Kill',TextColor3=Color3.new(0.0941177, 0.0941177, 0.0941177),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,AutoButtonColor=true,Modal=false,Selected=false,Style=Enum.ButtonStyle.Custom,Active=true,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.278431, 0.278431, 0.278431),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.216666669, 0, 0.576271057, 0),Rotation=0,Selectable=true,Size=UDim2.new(0, 65, 0, 15),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='Kill',Parent = Mainframe})
+        local TextLabel = CreateInstance('TextLabel',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='Psykek#3180',TextColor3=Color3.new(0.505882, 0.505882, 0.505882),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,Active=false,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.152941, 0.152941, 0.152941),BackgroundTransparency=0,BorderColor3=Color3.new(0.105882, 0.164706, 0.207843),BorderSizePixel=0,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.200000003, 0, 0, 0),Rotation=0,Selectable=false,Size=UDim2.new(0, 71, 0, 13),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='TextLabel',Parent = Topframe})
+        local Close = CreateInstance('TextButton',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='',TextColor3=Color3.new(0, 0, 0),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,AutoButtonColor=true,Modal=false,Selected=false,Style=Enum.ButtonStyle.Custom,Active=true,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.152941, 0.152941, 0.152941),BackgroundTransparency=0,BorderColor3=Color3.new(0.105882, 0.164706, 0.207843),BorderSizePixel=0,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.929563403, 0, 0, 0),Rotation=0,Selectable=true,Size=UDim2.new(0, 8, 0, 7),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='Close',Parent = Topframe})
+        local Topframe2 = CreateInstance('Frame',{Style=Enum.FrameStyle.Custom,Active=false,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.152941, 0.152941, 0.152941),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.158686712, 0, 0.344506502, 0),Rotation=0,Selectable=false,Size=UDim2.new(0, 138, 0, 14),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name = 'Topframe2',Parent = FEkillgui})
+        local Mainframe2 = CreateInstance('Frame',{Style=Enum.FrameStyle.Custom,Active=false,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.219608, 0.219608, 0.219608),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(-7.06953942e-05, 0, 1.09630907, 0),Rotation=0,Selectable=false,Size=UDim2.new(0, 138, 0, 69),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name = 'Mainframe2',Parent = Topframe2})
+        local Start = CreateInstance('TextButton',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='Start',TextColor3=Color3.new(0.0509804, 0.0509804, 0.0509804),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,AutoButtonColor=true,Modal=false,Selected=false,Style=Enum.ButtonStyle.Custom,Active=true,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.278431, 0.278431, 0.278431),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.0670511797, 0, 0.107452832, 0),Rotation=0,Selectable=true,Size=UDim2.new(0, 53, 0, 14),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='Start',Parent = Mainframe2})
+        local Stop = CreateInstance('TextButton',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='Stop',TextColor3=Color3.new(0.0509804, 0.0509804, 0.0509804),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,AutoButtonColor=true,Modal=false,Selected=false,Style=Enum.ButtonStyle.Custom,Active=true,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.278431, 0.278431, 0.278431),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.544790387, 0, 0.107452832, 0),Rotation=0,Selectable=true,Size=UDim2.new(0, 53, 0, 14),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='Stop',Parent = Mainframe2})
+        local Plus100 = CreateInstance('TextButton',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='+100',TextColor3=Color3.new(0.0941177, 0.0941177, 0.0941177),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,AutoButtonColor=true,Modal=false,Selected=false,Style=Enum.ButtonStyle.Custom,Active=true,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.278431, 0.278431, 0.278431),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.0670511797, 0, 0.491977364, 0),Rotation=0,Selectable=true,Size=UDim2.new(0, 53, 0, 11),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='Plus100',Parent = Mainframe2})
+        local Min100 = CreateInstance('TextButton',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='-100',TextColor3=Color3.new(0.0941177, 0.0941177, 0.0941177),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,AutoButtonColor=true,Modal=false,Selected=false,Style=Enum.ButtonStyle.Custom,Active=true,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.278431, 0.278431, 0.278431),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.546521723, 0, 0.491977364, 0),Rotation=0,Selectable=true,Size=UDim2.new(0, 53, 0, 11),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='Min100',Parent = Mainframe2})
+        local min10000 = CreateInstance('TextButton',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='-10000',TextColor3=Color3.new(0.0941177, 0.0941177, 0.0941177),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,AutoButtonColor=true,Modal=false,Selected=false,Style=Enum.ButtonStyle.Custom,Active=true,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.278431, 0.278431, 0.278431),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.546521723, 0, 0.73619473, 0),Rotation=0,Selectable=true,Size=UDim2.new(0, 53, 0, 11),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='min10000',Parent = Mainframe2})
+        local plus10000 = CreateInstance('TextButton',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='+10000',TextColor3=Color3.new(0.0941177, 0.0941177, 0.0941177),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,AutoButtonColor=true,Modal=false,Selected=false,Style=Enum.ButtonStyle.Custom,Active=true,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.278431, 0.278431, 0.278431),BackgroundTransparency=0,BorderColor3=Color3.new(0.152941, 0.152941, 0.152941),BorderSizePixel=1,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.0670511797, 0, 0.73619473, 0),Rotation=0,Selectable=true,Size=UDim2.new(0, 53, 0, 11),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='plus10000',Parent = Mainframe2})
+        local TextLabel = CreateInstance('TextLabel',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='Psykek#3180',TextColor3=Color3.new(0.505882, 0.505882, 0.505882),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,Active=false,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.152941, 0.152941, 0.152941),BackgroundTransparency=0,BorderColor3=Color3.new(0.105882, 0.164706, 0.207843),BorderSizePixel=0,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.201153517, 0, 0.214285731, 0),Rotation=0,Selectable=false,Size=UDim2.new(0, 82, 0, 8),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='TextLabel',Parent = Topframe2})
+        local Close2 = CreateInstance('TextButton',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='',TextColor3=Color3.new(0, 0, 0),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,AutoButtonColor=true,Modal=false,Selected=false,Style=Enum.ButtonStyle.Custom,Active=true,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.152941, 0.152941, 0.152941),BackgroundTransparency=0,BorderColor3=Color3.new(0.105882, 0.164706, 0.207843),BorderSizePixel=0,ClipsDescendants=false,Draggable=false,Position=UDim2.new(0.934924126, 0, 0, 0),Rotation=0,Selectable=true,Size=UDim2.new(0, 8, 0, 9),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='Close2',Parent = Topframe2})
+        local IY = CreateInstance('TextButton',{Font=Enum.Font.SourceSans,FontSize=Enum.FontSize.Size14,Text='IY',TextColor3=Color3.new(0.498039, 0.498039, 0.498039),TextScaled=false,TextSize=14,TextStrokeColor3=Color3.new(0, 0, 0),TextStrokeTransparency=1,TextTransparency=0,TextWrapped=false,TextXAlignment=Enum.TextXAlignment.Center,TextYAlignment=Enum.TextYAlignment.Center,AutoButtonColor=true,Modal=false,Selected=false,Style=Enum.ButtonStyle.Custom,Active=true,AnchorPoint=Vector2.new(0, 0),BackgroundColor3=Color3.new(0.152941, 0.152941, 0.152941),BackgroundTransparency=0,BorderColor3=Color3.new(0.105882, 0.164706, 0.207843),BorderSizePixel=0,ClipsDescendants=false,Draggable=false,Position=UDim2.new(-0.00710487366, 0, -9.53674316e-07, 0),Rotation=0,Selectable=true,Size=UDim2.new(0, 14, 0, 13),SizeConstraint=Enum.SizeConstraint.RelativeXY,Visible=true,ZIndex=1,Name='IY',Parent = Topframe2})
+
+        Topframe.Active = true
+        Topframe.Draggable = true
+        Topframe2.Active = true
+        Topframe2.Draggable = true
+
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        local function RemoveSpaces(String)
+            return String:gsub("%s+", "") or String
+        end
+
+        local function FindPlayer(String)
+            String = RemoveSpaces(String)
+            for _, _Player in pairs(Players:GetPlayers()) do
+                if _Player.Name:lower():match('^'.. String:lower()) then
+                    return _Player
+                end
+            end
+            return nil
+        end
+
+        Close.MouseButton1Click:Connect(function()
+            Topframe:Destroy()
+        end)
+
+        Close2.MouseButton1Click:Connect(function()
+            Topframe2:Destroy()
+        end)
+
+        Kill.MouseButton1Click:Connect(function()
+            local Target = FindPlayer(Namebox.Text)
+            if Target and Target.Character then
+                local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+                local Torso = Character:FindFirstChild("Torso") or Character:FindFirstChild("UpperTorso")
+
+                local savepos = LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame
+                Torso.Anchored = true
+                local tool = Instance.new("Tool", LocalPlayer.Backpack)
+                local hat = LocalPlayer.Character:FindFirstChildOfClass("Accessory")
+                local hathandle = hat.Handle
+                hathandle.Parent = tool
+                hathandle.Massless = true
+                tool.GripPos = Vector3.new(0, 9e99, 0)
+                tool.Parent = LocalPlayer.Character
+                repeat wait() until LocalPlayer.Character:FindFirstChildOfClass("Tool") ~= nil
+                tool.Grip = CFrame.new(Vector3.new(0, 0, 0))
+                Torso.Anchored = false
+                repeat LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = Target.Character:FindFirstChild("HumanoidRootPart").CFrame wait()
+                until Target.Character == nil or Target.Character:FindFirstChild("Humanoid").Health <= 0 or LocalPlayer.Character == nil or LocalPlayer.Character:FindFirstChild("Humanoid").Health <= 0 or (Target.Character:FindFirstChild("HumanoidRootPart").Velocity.magnitude - Target.Character:FindFirstChild("Humanoid").WalkSpeed) > (Target.Character:FindFirstChild("Humanoid").WalkSpeed + 20)
+                LocalPlayer.Character:FindFirstChild("Humanoid"):UnequipTools()
+                hathandle.Parent = hat
+                hathandle.Massless = false
+                tool:Destroy()
+                LocalPlayer.Character:FindFirstChild("HumanoidRootPart").CFrame = savepos
+            else
+                warn'no player found named like that or he has no char'
+            end
+        end)
+
+        power = 500
+        active = false
+        local val = Instance.new("IntValue")
+        val.Name = "Number"
+        val.Parent = game.Players.LocalPlayer
+        val.Value = 5
+
+        Start.MouseButton1Click:Connect(function()
+            game:GetService('RunService').Stepped:connect(function()
+        if game.Players.LocalPlayer.Character.Humanoid.RigType == Enum.HumanoidRigType.R6 then
+        game.Players.LocalPlayer.Character.Head.CanCollide = false
+        game.Players.LocalPlayer.Character.Torso.CanCollide = false
+        game.Players.LocalPlayer.Character["Left Leg"].CanCollide = false
+        game.Players.LocalPlayer.Character["Right Leg"].CanCollide = false
+        else
+        if game.Players.LocalPlayer.Character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
+        game.Players.LocalPlayer.Character.Head.CanCollide = false
+        game.Players.LocalPlayer.Character.UpperTorso.CanCollide = false
+        game.Players.LocalPlayer.Character.LowerTorso.CanCollide = false
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CanCollide = false
+        end
+        end
+        end)
+        wait(.1)
+        local bambam = Instance.new("BodyThrust")
+        bambam.Parent = game.Players.LocalPlayer.Character.HumanoidRootPart
+        bambam.Force = Vector3.new(power,0,power)
+        bambam.Location = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+        end)
+
+        Stop.MouseButton1Click:Connect(function()
+            for i=1, 200 do
+            active = false
+        game.Players.LocalPlayer.Character.HumanoidRootPart.BodyThrust:Remove()
+        end
+        end)
+
+        Plus100.MouseButton1Click:Connect(function()
+            power = power + 100
+        game.Players.LocalPlayer.Number.Value = game.Players.LocalPlayer.Number.Value + 1
+        end)
+
+        Min100.MouseButton1Click:Connect(function()
+            power = power - 100
+        game.Players.LocalPlayer.Number.Value = game.Players.LocalPlayer.Number.Value - 1
+        end)
+
+        plus10000.MouseButton1Click:Connect(function()
+            power = power + 10000
+        game.Players.LocalPlayer.Number.Value = game.Players.LocalPlayer.Number.Value + 1
+        end)
+
+        min10000.MouseButton1Click:Connect(function()
+            power = power - 10000
+        game.Players.LocalPlayer.Number.Value = game.Players.LocalPlayer.Number.Value - 1
+        end)
+
+        IY.MouseButton1Click:Connect(function()
+            loadstring(game:HttpGet(('https://pastebin.com/raw/MjBzRjmT'),true))()
+        end)
+OrionLib:MakeNotification({
+Name = "Script Executed",
+Content = "Successfully executed: FE Spy",
+Image = "nil",
+Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "FE Spy",
+Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/MichaelScripter/MiniScript/main/Spy gui.lua"))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed: FE Spy",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Anti Lag",
+Callback = function()
+local ToDisable = {
+    Textures = true,
+    VisualEffects = true,
+    Parts = true,
+    Particles = true,
+    Sky = true
+   }
+
+   local ToEnable = {
+    FullBright = false
+   }
+
+   local Stuff = {}
+
+   for _, v in next, game:GetDescendants() do
+    if ToDisable.Parts then
+     if v:IsA("Part") or v:IsA("Union") or v:IsA("BasePart") then
+      v.Material = Enum.Material.SmoothPlastic
+      table.insert(Stuff, 1, v)
+     end
+    end
+
+    if ToDisable.Particles then
+     if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Explosion") or v:IsA("Sparkles") or v:IsA("Fire") then
+      v.Enabled = false
+      table.insert(Stuff, 1, v)
+     end
+    end
+
+    if ToDisable.VisualEffects then
+     if v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("DepthOfFieldEffect") or v:IsA("SunRaysEffect") then
+      v.Enabled = false
+      table.insert(Stuff, 1, v)
+     end
+    end
+
+    if ToDisable.Textures then
+     if v:IsA("Decal") or v:IsA("Texture") then
+      v.Texture = ""
+      table.insert(Stuff, 1, v)
+     end
+    end
+
+    if ToDisable.Sky then
+     if v:IsA("Sky") then
+      v.Parent = nil
+      table.insert(Stuff, 1, v)
+     end
+    end
+   end
+
+   game:GetService("TestService"):Message("Effects Disabler Script : Successfully disabled "..#Stuff.." assets / effects. Settings :")
+
+   for i, v in next, ToDisable do
+    print(tostring(i)..": "..tostring(v))
+   end
+
+   if ToEnable.FullBright then
+       local Lighting = game:GetService("Lighting")
+
+       Lighting.FogColor = Color3.fromRGB(255, 255, 255)
+       Lighting.FogEnd = math.huge
+       Lighting.FogStart = math.huge
+       Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+       Lighting.Brightness = 5
+       Lighting.ColorShift_Bottom = Color3.fromRGB(255, 255, 255)
+       Lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255)
+       Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+       Lighting.Outlines = true
+   end
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed: Anti Lag",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Doors Shadow Hub",
+Callback = function()
+loadstring(game:HttpGet('https://raw.githubusercontent.com/ShadowScripts4Roblox/PROTECTEDLUA/main/Scripts/DOORS/Loader52.lua'))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Doors Shadow Hub",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Pet Simulator 99",
+Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzHUB/PetSimulator99/main/redz9999.lua"))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Doors Shadow Hub",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "REDz Hub Brookhaven",
+Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzHUB/REDzHUB/main/REDzHUB"))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: REDz Hub Brookhaven",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Jul Hub ",
+Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/JulHubz/JulHub/main/JulHub"))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Player Fling",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Death Ball (Crashing)",
+Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/diepedyt/bui/main/newMainKeySytem.lua"))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Player Fling",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Jul Hub ",
+Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzHUB/PetSimulator99/main/redz9999.lua"))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Player Fling",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Jul Hub ",
+Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzHUB/PetSimulator99/main/redz9999.lua"))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Player Fling",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+StandardStuffTab:AddButton({
+Name = "Jul Hub ",
+Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzHUB/PetSimulator99/main/redz9999.lua"))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Player Fling",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+-- Premium Section --
+local premiumKey = "getwave"
+local premiumAccess = true
+
+local PremiumTab = Window:MakeTab({
+Name = "Premium Stuff",
+Icon = "rbxassetid://16914358039",
+PremiumOnly = false
+})
+
+local PremiumSection = PremiumTab:AddSection({
+Name = "Premium"
+})
+
+PremiumTab:AddButton({
+Name = "Redz Pet Simulator99",
+Callback = function()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/REDzHUB/PetSimulator99/main/redz9999.lua"))()
+OrionLib:MakeNotification({
+    Name = "Script Executed",
+    Content = "Successfully executed script: Pet Simulator99",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+end
+})
+
+
+-- Notification for script loaded
+OrionLib:MakeNotification({
+Name = "Script Loaded",
+Content = "Scripter Hub X V1 DEV is now active",
+Image = "rbxassetid://2420004216",
+Time = 5
+})
+
+-- Settings Tab --
+local SettingsTab = Window:MakeTab({
+Name = "Settings",
+Icon = "rbxassetid://14134158045",
+PremiumOnly = false
+})
+
+local SettingsSection = SettingsTab:AddSection({
+Name = "Settings"
+})
+
+-- Button to copy Discord link --
+SettingsSection:AddButton({
+Name = "Discord",
+Callback = function()
+setclipboard("https://discord.gg/fx7Kz96uBX")
+OrionLib:MakeNotification({
+    Name = "Discord Link Copied",
+    Content = "Discord link has been copied to clipboard",
+    Image = "rbxassetid://17056354120",
+    Time = 5
+})
+end    
+})
+
+SettingsSection:AddButton({
+Name = "Destroy UI",
+Callback = function()
+OrionLib:Destroy()
+end    
+})
+-- Textbox to enter Premium Key --
+SettingsSection:AddTextbox({
+Name = "Enter Premium Key",
+Default = "Enter here",
+TextDisappear = true,
+Callback = function(value)
+if value == premiumKey then
+    premiumAccess = true
+    OrionLib:MakeNotification({
+        Name = "Success",
+        Content = "Premium Features Unlocked Have Fun",
+        Image = "rbxassetid://16914358039",
+        Time = 5
+    })
+    Window:SetPremium(true) -- Enable premium status
+else
+    OrionLib:MakeNotification({
+        Name = "Error",
+        Content = "Invalid Key",
+        Image = "rbxassetid://16914358039",
+        Time = 5
+    })
+end
+checkPremiumAccess()
+end
+})
+
+-- Function to show/hide Premium Tab based on access
+local function checkPremiumAccess()
+if premiumAccess then
+PremiumTab:Show(true)
+else
+PremiumTab:Show(true)
+end
+end
+
+-- Call the check function when script loads
+checkPremiumAccess(true)
+
+-- Premium Section (Placeholder for Premium features)
+PremiumSection:AddButton({
+Name = "Premium Feature 1",
+Callback = function()
+-- Add Premium feature 1 functionality here
+OrionLib:MakeNotification({
+    Name = "Premium Feature 1",
+    Content = "Premium feature 1 activated",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+    })
+                    end,
+                })
